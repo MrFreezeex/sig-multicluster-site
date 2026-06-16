@@ -25,6 +25,7 @@ The Cluster Inventory API has two kinds of implementations:
 - [Knative Operator][knative-operator]: Alpha (since Knative Operator v1.22)
 - [Kueue (MultiKueue)][kueue]: Alpha (since Kueue v0.15.0, behind the `MultiKueueClusterProfile` feature gate)
 - [multicluster-runtime][mcr]: Alpha (since v0.21.0-alpha.9)
+- [Project Sveltos][sveltos]: Alpha (via [clusterinventory-controller][sveltos-clusterinventory-controller] v1.11.1)
 - [Argo CD][argocd]: Available (via [argoproj-labs/clusterprofile-integration-for-argocd][argocd-cp-integration])
 
 ## Implementations
@@ -37,6 +38,7 @@ The consumer implementations target different layers:
 - Use the **Knative Operator** to roll out Knative Serving and Eventing to member clusters.
 - Use **MultiKueue** when the workloads you dispatch across clusters are batch jobs.
 - Use **multicluster-runtime** when you are building your own controller on top of controller-runtime and want `ClusterProfile`-driven fleet discovery.
+- Use **Project Sveltos** to translate `ClusterProfile` inventory into Sveltos-managed clusters for add-on and application deployment.
 - Use **Argo CD** to deliver applications across clusters via GitOps.
 
 ### Open Cluster Management
@@ -121,6 +123,20 @@ The Cluster Inventory API provider was introduced in [v0.21.0-alpha.9 (August 20
 [mcr-cip-kcfg]: https://github.com/kubernetes-sigs/multicluster-runtime/tree/main/providers/cluster-inventory-api/kubeconfigstrategy
 [mcr-cip-example]: https://github.com/kubernetes-sigs/multicluster-runtime/tree/main/examples/cluster-inventory-api
 [mcr-v0-21-a9]: https://github.com/kubernetes-sigs/multicluster-runtime/releases/tag/v0.21.0-alpha.9
+
+### Project Sveltos
+
+[Project Sveltos][sveltos] is a Kubernetes add-on and application deployment controller for multicluster fleets. Its [clusterinventory-controller][sveltos-clusterinventory-controller] bridge watches `ClusterProfile` resources and translates each profile into a `SveltosCluster` plus a kubeconfig Secret, so existing Sveltos controllers can manage the member cluster through the normal Sveltos cluster lifecycle.
+
+The controller resolves credentials through the access provider referenced in `status.accessProviders` (or the deprecated `status.credentialProviders`). Operators can enable any exec credential plugin-backed access provider by configuring `--clusterprofile-provider-file`.
+
+The bridge was added after [projectsveltos/sveltos#625][sveltos-issue-625] and is available as alpha in [clusterinventory-controller v1.11.1][sveltos-cic-v1-11-1]. See the [clusterinventory-controller README][sveltos-cic-readme] for requirements and provider configuration details.
+
+[sveltos]: https://projectsveltos.io/
+[sveltos-clusterinventory-controller]: https://github.com/projectsveltos/clusterinventory-controller
+[sveltos-cic-readme]: https://github.com/projectsveltos/clusterinventory-controller/blob/v1.11.1/README.md
+[sveltos-cic-v1-11-1]: https://github.com/projectsveltos/clusterinventory-controller/releases/tag/v1.11.1
+[sveltos-issue-625]: https://github.com/projectsveltos/sveltos/issues/625
 
 ### Argo CD
 
